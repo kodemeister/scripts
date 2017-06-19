@@ -1,9 +1,19 @@
 #!/bin/bash
 
 INET_IF="ppp0"
-
 INET_TCP_PORTS=(
-	51413 # bittorrent
+	51413 # BitTorrent
+)
+
+VM_IF="br0"
+VM_TCP_PORTS=(
+	139   # NetBIOS Session
+	445   # SMB over TCP
+	24800 # Synergy
+)
+VM_UDP_PORTS=(
+	137   # NetBIOS Name Service
+	138   # NetBIOS Datagram
 )
 
 check_if_root()
@@ -80,6 +90,19 @@ set_inet_rules()
 	iptables -A INPUT -j REJECT --reject-with icmp-proto-unreachable
 }
 
+set_vm_rules()
+{
+	echo "Setting iptables rules for virtual machines..."
+
+	# open additional TCP/UDP ports but only for connections coming from virtual machines
+	for PORT in "${VM_TCP_PORTS[@]}"; do
+		iptables -A tcp -i "$VM_IF" -p tcp --dport "$PORT" -j ACCEPT
+	done
+	for PORT in "${VM_UDP_PORTS[@]}"; do
+		iptables -A udp -i "$VM_IF" -p udp --dport "$PORT" -j ACCEPT
+	done
+}
+
 save_rules()
 {
 	echo "Saving iptables rules..."
@@ -94,6 +117,7 @@ main()
 	create_user_chains
 	set_default_policies
 	set_inet_rules
+	set_vm_rules
 	save_rules
 }
 
