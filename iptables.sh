@@ -6,6 +6,7 @@ INET_TCP_PORTS=(
 )
 
 VM_IF="br0"
+VM_SUBNET="192.168.13.0/24"
 VM_TCP_PORTS=(
 	139   # NetBIOS Session
 	445   # SMB over TCP
@@ -94,6 +95,12 @@ set_vm_rules()
 {
 	echo "Setting iptables rules for virtual machines..."
 
+	# allow any established outgoing connections to receive replies from other hosts
+	iptables -A FORWARD -m conntrack --ctstate ESTABLISHED,RELATED -j ACCEPT
+
+	# accept outgoing connections from virtual machines
+	iptables -A FORWARD -i "$VM_IF" -j ACCEPT
+
 	# open additional TCP/UDP ports but only for connections coming from virtual machines
 	for PORT in "${VM_TCP_PORTS[@]}"; do
 		iptables -A tcp -i "$VM_IF" -p tcp --dport "$PORT" -j ACCEPT
@@ -101,6 +108,15 @@ set_vm_rules()
 	for PORT in "${VM_UDP_PORTS[@]}"; do
 		iptables -A udp -i "$VM_IF" -p udp --dport "$PORT" -j ACCEPT
 	done
+
+	# reject all remaining forwarded traffic with ICMP host unreachable messages
+	iptables -A FORWARD -j REJECT --reject-with icmp-host-unreachable
+
+	# setup NAT for virtual machines
+	iptables -t nat -A POSTROUTING -s "$VM_SUBNET" -o "$INET_IF" -j MASQUERADE
+
+	# clamp MSS field in TCP packets to PMTU value (required for PPP connections)
+	iptables -t mangle -A FORWARD -p tcp --tcp-flags SYN,RST SYN -j TCPMSS --clamp-mss-to-pmtu
 }
 
 save_rules()
