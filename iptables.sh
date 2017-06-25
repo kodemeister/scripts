@@ -16,6 +16,12 @@ VM_UDP_PORTS=(
 	137   # NetBIOS Name Service
 	138   # NetBIOS Datagram
 )
+VM_WHITELIST=(
+	8.8.8.8            # Google Public DNS
+	192.30.252.0/22    # GitHub
+	185.199.108.0/22   # GitHub
+	50.31.156.0/25     # Beanstalk
+)
 
 check_if_root()
 {
@@ -47,6 +53,7 @@ create_user_chains()
 
 	iptables -N tcp
 	iptables -N udp
+	iptables -N whitelist
 }
 
 set_default_policies()
@@ -62,7 +69,7 @@ set_inet_rules()
 {
 	echo "Setting iptables rules for Internet access..."
 
-	# allow any established outgoing connections to receive replies from other hosts
+	# allow already established incoming connections
 	iptables -A INPUT -m conntrack --ctstate ESTABLISHED,RELATED -j ACCEPT
 
 	# accept all traffic that comes to the loopback interface
@@ -95,11 +102,16 @@ set_vm_rules()
 {
 	echo "Setting iptables rules for virtual machines..."
 
-	# allow any established outgoing connections to receive replies from other hosts
+	# allow already established connections in both directions
 	iptables -A FORWARD -m conntrack --ctstate ESTABLISHED,RELATED -j ACCEPT
 
-	# accept outgoing connections from virtual machines
-	iptables -A FORWARD -i "$VM_IF" -j ACCEPT
+	# filter all outgoing Internet connections from virtual machines in user-defined whitelist chain
+	iptables -A FORWARD -i "$VM_IF" -j whitelist
+
+	# grant access only to whitelisted IP addresses
+	for IP in "${VM_WHITELIST[@]}"; do
+		iptables -A whitelist -d "$IP" -j ACCEPT
+	done
 
 	# open additional TCP/UDP ports but only for connections coming from virtual machines
 	for PORT in "${VM_TCP_PORTS[@]}"; do
