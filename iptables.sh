@@ -8,11 +8,14 @@ INET_TCP_PORTS=(
 VM_IF="br0"
 VM_SUBNET="192.168.13.0/24"
 VM_TCP_PORTS=(
+	53    # Domain Name System
 	139   # NetBIOS Session
 	445   # SMB over TCP
 	24800 # Synergy
 )
 VM_UDP_PORTS=(
+	53    # Domain Name System
+	67    # Dynamic Host Configuration Protocol
 	137   # NetBIOS Name Service
 	138   # NetBIOS Datagram
 )
