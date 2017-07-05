@@ -20,10 +20,15 @@ VM_UDP_PORTS=(
 	138   # NetBIOS Datagram
 )
 VM_WHITELIST=(
-	8.8.8.8            # Google Public DNS
 	192.30.252.0/22    # GitHub
 	185.199.108.0/22   # GitHub
 	50.31.156.0/25     # Beanstalk
+	54.88.117.136      # Sfera (frontier.sferalabs.com)
+	172.217.9.0/24     # Google (www.googleapis.com, fonts.googleapis.com, fonts.gstatic.com)
+	104.19.192.0/25    # Cloudflare (cdnjs.cloudflare.com)
+	23.204.100.0/23    # Adobe (fpdownload.adobe.com)
+	52.216.1.0/24      # Amazon (s3.amazonaws.com)
+	91.199.212.0/24    # Comodo (timestamp.comodoca.com)
 )
 
 check_if_root()
