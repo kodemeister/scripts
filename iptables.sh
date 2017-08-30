@@ -34,7 +34,6 @@ declare -r VM_WHITELIST=(
   91.189.95.83       # ppa.launchpad.net
   54.88.117.136      # frontier.sferalabs.com
   91.199.212.132     # timestamp.comodoca.com
-  17.171.8.18        # timestamp.apple.com
   # Dynamically changing IP addresses (pinned in /etc/dnsmasq.conf)
   151.101.84.133     # raw.githubusercontent.com
   91.189.88.149      # security.ubuntu.com
@@ -43,6 +42,7 @@ declare -r VM_WHITELIST=(
   104.19.195.102     # cdnjs.cloudflare.com
   104.122.240.69     # fpdownload.adobe.com
   52.216.84.75       # s3.amazonaws.com
+  17.32.213.129      # timestamp.apple.com
 )
 
 check_if_root()
