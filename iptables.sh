@@ -43,6 +43,8 @@ declare -r VM_WHITELIST=(
   104.122.240.69     # fpdownload.adobe.com
   52.216.84.75       # s3.amazonaws.com
   17.32.213.129      # timestamp.apple.com
+  17.253.55.211      # phobos.apple.com
+  188.234.145.81     # v2.phobos.apple.com.edgesuite.net
 )
 
 check_if_root()
