@@ -36,6 +36,7 @@ declare -r VM_WHITELIST=(
   91.199.212.132     # timestamp.comodoca.com
   # Dynamically changing IP addresses (pinned in /etc/dnsmasq.conf)
   151.101.84.133     # raw.githubusercontent.com
+  151.101.112.223    # pypi.python.org
   91.189.88.149      # security.ubuntu.com
   173.194.222.95     # www.googleapis.com, fonts.googleapis.com
   173.194.44.87      # fonts.gstatic.com
