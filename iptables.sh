@@ -23,21 +23,15 @@ declare -r VM_WHITELIST=(
   192.30.252.0/22    # GitHub
   185.199.108.0/22   # GitHub
   50.31.156.0/25     # Beanstalk
-  91.189.92.150      # archive.canonical.com
-  91.189.92.191      # archive.canonical.com
+  91.189.88.0/21     # Canonical Group Limited
+  162.213.32.0/22    # Canonical USA Inc.
+  185.125.188.0/22   # Canonical Group Limited
   213.180.204.183    # ru.archive.ubuntu.com
-  91.189.92.152      # extras.ubuntu.com
-  91.189.89.49       # keyserver.ubuntu.com
-  91.189.90.55       # keyserver.ubuntu.com
-  91.189.89.222      # launchpad.net
-  91.189.89.223      # launchpad.net
-  91.189.95.83       # ppa.launchpad.net
   54.88.117.136      # frontier.sferalabs.com
   91.199.212.132     # timestamp.comodoca.com
   # Dynamically changing IP addresses (pinned in /etc/dnsmasq.conf)
   151.101.84.133     # raw.githubusercontent.com
   151.101.112.223    # pypi.python.org
-  91.189.88.149      # security.ubuntu.com
   173.194.222.95     # www.googleapis.com, fonts.googleapis.com
   173.194.44.87      # fonts.gstatic.com
   104.19.195.102     # cdnjs.cloudflare.com
