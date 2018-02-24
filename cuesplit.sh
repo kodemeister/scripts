@@ -1,38 +1,49 @@
 #!/bin/bash
 
-echo_color()
-{
-  echo "$(tput setaf $2)$1$(tput sgr 0)"
+declare -r BLACK=0
+declare -r RED=1
+declare -r GREEN=2
+declare -r YELLOW=3
+declare -r BLUE=4
+declare -r MAGENTA=5
+declare -r CYAN=6
+declare -r WHITE=7
+
+scan_dir() {
+  print_message "Scanning directory $1" $BLUE
+
+  find "$1" -type f -name "*.cue" -print0 | while IFS= read -r -d $'\0' cue_file; do
+    split_audio_file "$cue_file"
+  done
 }
 
-split_audio_file()
-{
-  local cue_file="$1"
-  echo_color "Found CUE file $cue_file" 4
+split_audio_file() {
+  local -r cue_file="$1"
+  print_message "Found CUE file $cue_file" $BLUE
 
   if [[ -f "${cue_file%.cue}.ape" ]]; then
-    local audio_file="${cue_file%.cue}.ape"
+    local -r audio_file="${cue_file%.cue}.ape"
   elif [[ -f "${cue_file%.cue}.flac" ]]; then
-    local audio_file="${cue_file%.cue}.flac"
+    local -r audio_file="${cue_file%.cue}.flac"
   elif [[ -f "${cue_file%.cue}.wv" ]]; then
-    local audio_file="${cue_file%.cue}.wv"
+    local -r audio_file="${cue_file%.cue}.wv"
   else
-    echo_color "Warning: audio file not found, skipping" 3
+    print_message "Warning: audio file not found, skipping" $YELLOW
     return
   fi
 
-  echo_color "Found audio file $audio_file" 4
+  print_message "Found audio file $audio_file" $BLUE
 
-  local split_dir="${cue_file%.cue}.tmp"
+  local -r split_dir="${cue_file%.cue}.tmp"
   mkdir -p "$split_dir"
 
   if ! shnsplit -d "$split_dir" -f "$cue_file" -o "flac flac -V --best -o %f -" -t "%n - %t" "$audio_file"; then
-    echo_color "Error: failed to split audio file $audio_file" 1
+    print_message "Error: failed to split audio file $audio_file" $RED
     exit 1
   fi
 
   if ! cuetag.sh "$cue_file" "$split_dir"/*.flac; then
-    echo_color "Error: failed to tag splitted files" 1
+    print_message "Error: failed to tag splitted files" $RED
     exit 1
   fi
 
@@ -41,20 +52,20 @@ split_audio_file()
   rm -rf "$split_dir"
   rm "$cue_file" "$audio_file"
 
-  echo_color "Successfully splitted audio file $audio_file" 2
+  print_message "Successfully splitted audio file $audio_file" $GREEN
 }
 
-main()
-{
-  local scan_dir="$1"
-  if [[ -z "$scan_dir" ]]; then
-    scan_dir="."
+print_message() {
+  echo "$(tput setaf $2)$1$(tput sgr 0)"
+}
+
+main() {
+  if [[ $# -eq 0 ]]; then
+    set -- "."
   fi
 
-  echo_color "Scanning directory $scan_dir" 4
-
-  find "$scan_dir" -type f -name "*.cue" -print0 | while IFS= read -r -d $'\0' cue_file; do
-    split_audio_file "$cue_file"
+  for dir in "$@"; do
+    scan_dir "$dir"
   done
 }
 
