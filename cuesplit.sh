@@ -21,13 +21,13 @@ split_audio_file() {
   local -r cue_file="$1"
   print_message "Found CUE file $cue_file" $BLUE
 
-  if [[ -f "${cue_file%.cue}.ape" ]]; then
-    local -r audio_file="${cue_file%.cue}.ape"
-  elif [[ -f "${cue_file%.cue}.flac" ]]; then
-    local -r audio_file="${cue_file%.cue}.flac"
-  elif [[ -f "${cue_file%.cue}.wv" ]]; then
-    local -r audio_file="${cue_file%.cue}.wv"
-  else
+  for extension in ape flac wv; do
+    if [[ -f "${cue_file%.cue}.$extension" ]]; then
+      local -r audio_file="${cue_file%.cue}.$extension"
+    fi
+  done
+
+  if [[ -z "$audio_file" ]]; then
     print_message "Warning: audio file not found, skipping" $YELLOW
     return
   fi
