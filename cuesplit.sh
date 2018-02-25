@@ -1,16 +1,7 @@
 #!/bin/bash
 
-declare -r BLACK=0
-declare -r RED=1
-declare -r GREEN=2
-declare -r YELLOW=3
-declare -r BLUE=4
-declare -r MAGENTA=5
-declare -r CYAN=6
-declare -r WHITE=7
-
 scan_dir() {
-  print_message "Scanning directory $1" $BLUE
+  echo "Scanning directory $1"
 
   find "$1" -type f -name "*.cue" -print0 | while IFS= read -r -d $'\0' cue_file; do
     split_audio_file "$cue_file"
@@ -19,7 +10,7 @@ scan_dir() {
 
 split_audio_file() {
   local -r cue_file="$1"
-  print_message "Found CUE file $cue_file" $BLUE
+  echo "Found CUE file $cue_file"
 
   for extension in ape flac wv; do
     if [[ -f "${cue_file%.cue}.$extension" ]]; then
@@ -28,22 +19,22 @@ split_audio_file() {
   done
 
   if [[ -z "$audio_file" ]]; then
-    print_message "Warning: audio file not found, skipping" $YELLOW
+    echo "Warning: audio file not found, skipping"
     return
   fi
 
-  print_message "Found audio file $audio_file" $BLUE
+  echo "Found audio file $audio_file"
 
   local -r split_dir="${cue_file%.cue}.tmp"
   mkdir -p "$split_dir"
 
   if ! shnsplit -d "$split_dir" -f "$cue_file" -o "flac flac -V --best -o %f -" -t "%n - %t" "$audio_file"; then
-    print_message "Error: failed to split audio file $audio_file" $RED
+    echo "Error: failed to split audio file $audio_file"
     exit 1
   fi
 
   if ! cuetag.sh "$cue_file" "$split_dir"/*.flac; then
-    print_message "Error: failed to tag splitted files" $RED
+    echo "Error: failed to tag split files"
     exit 1
   fi
 
@@ -52,11 +43,7 @@ split_audio_file() {
   rm -rf "$split_dir"
   rm "$cue_file" "$audio_file"
 
-  print_message "Successfully splitted audio file $audio_file" $GREEN
-}
-
-print_message() {
-  echo "$(tput setaf $2)$1$(tput sgr 0)"
+  echo "Successfully split audio file $audio_file"
 }
 
 main() {
