@@ -16,37 +16,46 @@ scanDirs dirs = for_ dirs scanDir
 scanDir :: Turtle.FilePath -> IO ()
 scanDir dir = do
     printf ("Scanning directory "%fp%"\n") dir
-    cueFiles <- sort $ find (suffix ".cue") dir
-    for_ cueFiles processCueFile
+    cueSheets <- sort $ find (suffix ".cue") dir
+    for_ cueSheets processCueSheet
 
-processCueFile :: Turtle.FilePath -> IO ()
-processCueFile cueFile = do
-    printf ("Found CUE file "%fp%"\n") cueFile
-    audioFiles <- filterM testfile $ map (replaceExtension cueFile) ["ape", "flac", "wv"]
+processCueSheet :: Turtle.FilePath -> IO ()
+processCueSheet cueSheet = do
+    printf ("Found cue sheet "%fp%"\n") cueSheet
+    let extensions = ["ape", "flac", "wv"]
+    audioFiles <- filterM testfile $ replaceExtension cueSheet <$> extensions
     case audioFiles of
         []            -> echo "Warning: audio file not found, skipping"
-        (audioFile:_) -> splitAudioFile cueFile audioFile
+        (audioFile:_) -> splitAudioFile cueSheet audioFile
 
 splitAudioFile :: Turtle.FilePath -> Turtle.FilePath -> IO ()
-splitAudioFile cueFile audioFile = do
+splitAudioFile cueSheet audioFile = do
     printf ("Found audio file "%fp%"\n") audioFile
-    let splitDir = replaceExtension cueFile "tmp"
+    let splitDir = replaceExtension cueSheet "tmp"
     mktree splitDir
 
-    proc "shnsplit" ["-d", format fp splitDir, "-f", format fp cueFile, "-o", "flac flac -V --best -o %f -", "-t", "%n - %t", format fp audioFile] empty
+    proc "shnsplit" [ "-d", format fp splitDir
+                    , "-f", format fp cueSheet
+                    , "-o", "flac flac -V --best -o %f -"
+                    , "-t", "%n - %t"
+                    , format fp audioFile
+                    ] empty
         .||. die (format ("Error: failed to split audio file "%fp) audioFile)
 
     splitFiles <- sort $ find (invert (suffix "00 - pregap.flac")) splitDir
-    proc "cuetag.sh" (map (format fp) (cueFile : splitFiles)) empty
+    proc "cuetag.sh" (format fp <$> (cueSheet : splitFiles)) empty
         .||. die "Error: failed to tag split files"
 
     for_ splitFiles $ \file ->
         mv file (parent splitDir </> filename file)
     rmtree splitDir
-    rm cueFile
+    rm cueSheet
     rm audioFile
 
     printf ("Successfully split audio file "%fp%"\n") audioFile
 
+parser :: Parser [Turtle.FilePath]
+parser = many $ argPath "dir" "A directory to recursively scan for cue sheets"
+
 main :: IO ()
-main = scanDirs =<< map fromText <$> arguments
+main = scanDirs =<< options "Split image+cue into separate flac tracks" parser
