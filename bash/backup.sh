@@ -12,16 +12,14 @@ declare -r STORAGE_SNAPSHOT="/dev/vg_storage/snap_storage"
 declare -r STORAGE_MOUNT_POINT="/mnt/snap_storage"
 declare -r STORAGE_BACKUP_DIR="$BACKUP_MOUNT_POINT/storage"
 
-check_if_root()
-{
+check_if_root() {
   if [[ "$EUID" -ne 0 ]]; then
     echo "Please run me as root"
     exit 1
   fi
 }
 
-mount_backup_volume()
-{
+mount_backup_volume() {
   echo "Mounting backup volume to $1..."
 
   if ! mount "$1"; then
@@ -30,8 +28,7 @@ mount_backup_volume()
   fi
 }
 
-unmount_backup_volume()
-{
+unmount_backup_volume() {
   echo "Unmounting backup volume from $1..."
 
   if ! umount "$1"; then
@@ -40,8 +37,7 @@ unmount_backup_volume()
   fi
 }
 
-mount_lvm_snapshot()
-{
+mount_lvm_snapshot() {
   echo "Mounting LVM snapshot $1 to $2..."
 
   mkdir -p "$2"
@@ -52,8 +48,7 @@ mount_lvm_snapshot()
   fi
 }
 
-unmount_lvm_snapshot()
-{
+unmount_lvm_snapshot() {
   echo "Unmounting LVM snapshot from $1..."
 
   if ! umount "$1"; then
@@ -64,18 +59,16 @@ unmount_lvm_snapshot()
   rmdir "$1"
 }
 
-remove_lvm_snapshot()
-{
+remove_lvm_snapshot() {
   echo "Removing LVM snapshot $1..."
 
   if ! lvremove -f "$1"; then
-    echo "ERROR: Failed to remove LVM snapshot $1..."
+    echo "ERROR: Failed to remove LVM snapshot $1"
     exit 1
   fi
 }
 
-backup_esp_partition()
-{
+backup_esp_partition() {
   echo "Backing up ESP partition $1 to $2..."
 
   rm -rf "$2"
@@ -87,8 +80,7 @@ backup_esp_partition()
   fi
 }
 
-backup_root_lvm_snapshot()
-{
+backup_root_lvm_snapshot() {
   echo "Backing up root LVM snapshot $1 to $2..."
 
   mkdir -p "$(dirname "$2")"
@@ -99,8 +91,7 @@ backup_root_lvm_snapshot()
   fi
 }
 
-backup_storage_lvm_snapshot()
-{
+backup_storage_lvm_snapshot() {
   echo "Backing up storage LVM snapshot $1 to $2..."
 
   mkdir -p "$2"
@@ -111,13 +102,11 @@ backup_storage_lvm_snapshot()
   fi
 }
 
-show_success_message()
-{
+show_success_message() {
   echo "Yay! Backup has been successfully completed!"
 }
 
-main()
-{
+main() {
   check_if_root
   mount_backup_volume "$BACKUP_MOUNT_POINT"
   mount_lvm_snapshot "$STORAGE_SNAPSHOT" "$STORAGE_MOUNT_POINT"
