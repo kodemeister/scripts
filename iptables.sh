@@ -1,6 +1,6 @@
 #!/bin/bash
 
-declare -r INET_IF="ppp0"
+declare -r INET_IF="enp5s0"
 declare -r INET_TCP_PORTS=(
   51413 # BitTorrent
 )
