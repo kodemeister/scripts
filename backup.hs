@@ -11,17 +11,19 @@ checkIfRoot = do
     userID <- getEffectiveUserID
     when (userID /= 0) $ die "Please run me as root"
 
-mountBackupVolume :: Turtle.FilePath -> IO ()
-mountBackupVolume mountPoint = do
-    printf ("Mounting backup volume to "%fp%"\n") mountPoint
-    execute "mount" [format fp mountPoint]
-          $ format ("Failed to mount "%fp) mountPoint
+mountBackupVolume :: Turtle.FilePath -> Turtle.FilePath -> IO ()
+mountBackupVolume volume mountPoint = do
+    printf ("Mounting backup volume "%fp%" to "%fp%"\n") volume mountPoint
+    mktree mountPoint
+    execute "mount" [format fp volume, format fp mountPoint]
+          $ format ("Failed to mount "%fp%" to "%fp) volume mountPoint
 
 unmountBackupVolume :: Turtle.FilePath -> IO ()
 unmountBackupVolume mountPoint = do
     printf ("Unmounting backup volume from "%fp%"\n") mountPoint
     execute "umount" [format fp mountPoint]
           $ format ("Failed to unmount "%fp) mountPoint
+    rmdir mountPoint
 
 mountLvmSnapshot :: Turtle.FilePath -> Turtle.FilePath -> IO ()
 mountLvmSnapshot snapshot mountPoint = do
@@ -43,9 +45,9 @@ removeLvmSnapshot snapshot = do
     execute "lvremove" ["-f", format fp snapshot]
           $ format ("Failed to remove "%fp) snapshot
 
-backupEspPartition :: Turtle.FilePath -> Turtle.FilePath -> IO ()
-backupEspPartition mountPoint backupDir = do
-    printf ("Backing up ESP partition "%fp%" to "%fp%"\n") mountPoint backupDir
+backupBootPartition :: Turtle.FilePath -> Turtle.FilePath -> IO ()
+backupBootPartition mountPoint backupDir = do
+    printf ("Backing up boot partition "%fp%" to "%fp%"\n") mountPoint backupDir
     proc "rm" ["-rf", format fp backupDir] empty
     mktree backupDir
     files <- sort (ls mountPoint)
@@ -57,7 +59,7 @@ backupRootLvmSnapshot snapshot backupFile = do
     printf ("Backing up LVM snapshot "%fp%" to "%fp%"\n") snapshot backupFile
     mktree (parent backupFile)
     execute "fsarchiver" [ "-o"
-                         , "-z", "1"
+                         , "-Z", "1"
                          , "-j", "4"
                          , "savefs"
                          , format fp backupFile
@@ -65,8 +67,8 @@ backupRootLvmSnapshot snapshot backupFile = do
                          ]
           $ format ("Failed to back up "%fp%" to "%fp) snapshot backupFile
 
-backupStorageLvmSnapshot :: Turtle.FilePath -> Turtle.FilePath -> IO ()
-backupStorageLvmSnapshot mountPoint backupDir = do
+backupHomeLvmSnapshot :: Turtle.FilePath -> Turtle.FilePath -> IO ()
+backupHomeLvmSnapshot mountPoint backupDir = do
     printf ("Backing up LVM snapshot "%fp%" to "%fp%"\n") mountPoint backupDir
     mktree backupDir
     execute "rsync" [ "-aAX"
@@ -88,26 +90,27 @@ execute command arguments errorText = do
 
 main :: IO ()
 main = do
-    let backupMountPoint  = "/media/backup"
+    let backupVolume     = "/dev/vg_backup/lv_backup"
+        backupMountPoint = "/mnt/backup"
 
-        espMountPoint     = "/media/esp"
-        espBackupDir      = backupMountPoint </> "esp"
+        bootMountPoint   = "/boot"
+        bootBackupDir    = backupMountPoint </> "boot"
 
-        rootSnapshot      = "/dev/vg_root/snap_root"
-        rootBackupFile    = backupMountPoint </> "root/root.fsa"
+        rootSnapshot     = "/dev/vg_root/snap_root"
+        rootBackupFile   = backupMountPoint </> "root.fsa"
 
-        storageSnapshot   = "/dev/vg_storage/snap_storage"
-        storageMountPoint = "/mnt/snap_storage"
-        storageBackupDir  = backupMountPoint </> "storage"
+        homeSnapshot     = "/dev/vg_home/snap_home"
+        homeMountPoint   = "/mnt/snap_home"
+        homeBackupDir    = backupMountPoint </> "home"
 
     checkIfRoot
-    mountBackupVolume backupMountPoint
-    mountLvmSnapshot storageSnapshot storageMountPoint
-    backupEspPartition espMountPoint espBackupDir
+    mountBackupVolume backupVolume backupMountPoint
+    mountLvmSnapshot homeSnapshot homeMountPoint
+    backupBootPartition bootMountPoint bootBackupDir
     backupRootLvmSnapshot rootSnapshot rootBackupFile
-    backupStorageLvmSnapshot storageMountPoint storageBackupDir
-    unmountLvmSnapshot storageMountPoint
+    backupHomeLvmSnapshot homeMountPoint homeBackupDir
+    unmountLvmSnapshot homeMountPoint
     unmountBackupVolume backupMountPoint
     removeLvmSnapshot rootSnapshot
-    removeLvmSnapshot storageSnapshot
+    removeLvmSnapshot homeSnapshot
     showSuccessMessage
