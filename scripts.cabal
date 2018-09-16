@@ -15,7 +15,7 @@ cabal-version:       >=1.10
 
 executable backup
   hs-source-dirs:      .
-  main-is:             backup.hs
+  main-is:             Backup.hs
   default-language:    Haskell2010
   build-depends:       base >= 4.7 && < 5
                      , turtle
@@ -23,7 +23,7 @@ executable backup
 
 executable cuesplit
   hs-source-dirs:      .
-  main-is:             cuesplit.hs
+  main-is:             Cuesplit.hs
   default-language:    Haskell2010
   build-depends:       base >= 4.7 && < 5
                      , system-filepath
