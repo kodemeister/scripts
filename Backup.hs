@@ -3,6 +3,7 @@
 
 {-# LANGUAGE OverloadedStrings #-}
 
+import Control.Foldl (list)
 import System.Posix.User (getEffectiveUserID)
 import Turtle
 
@@ -50,7 +51,7 @@ backupBootPartition mountPoint backupDir = do
     printf ("Backing up boot partition "%fp%" to "%fp%"\n") mountPoint backupDir
     proc "rm" ["-rf", format fp backupDir] empty
     mktree backupDir
-    files <- sort (ls mountPoint)
+    files <- fold (ls mountPoint) list
     execute "cp" ("-rp" : (format fp <$> files) <> [format fp backupDir])
           $ format ("Failed to back up "%fp%" to "%fp) mountPoint backupDir
 

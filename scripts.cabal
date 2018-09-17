@@ -18,6 +18,7 @@ executable backup
   main-is:             Backup.hs
   default-language:    Haskell2010
   build-depends:       base >= 4.7 && < 5
+                     , foldl
                      , turtle
                      , unix
 
@@ -26,5 +27,6 @@ executable cuesplit
   main-is:             Cuesplit.hs
   default-language:    Haskell2010
   build-depends:       base >= 4.7 && < 5
+                     , foldl
                      , system-filepath
                      , turtle

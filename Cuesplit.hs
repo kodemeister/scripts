@@ -6,6 +6,7 @@
 import Control.Monad (filterM)
 import Data.Foldable (for_)
 
+import Control.Foldl (list)
 import Filesystem.Path (replaceExtension)
 import Turtle
 
@@ -16,7 +17,7 @@ scanDirs dirs = for_ dirs scanDir
 scanDir :: Turtle.FilePath -> IO ()
 scanDir dir = do
     printf ("Scanning directory "%fp%"\n") dir
-    cueSheets <- sort $ find (suffix ".cue") dir
+    cueSheets <- fold (find (suffix ".cue") dir) list
     for_ cueSheets processCueSheet
 
 processCueSheet :: Turtle.FilePath -> IO ()
@@ -42,7 +43,8 @@ splitAudioFile cueSheet audioFile = do
                     ] empty
         .||. die (format ("Error: failed to split audio file "%fp) audioFile)
 
-    splitFiles <- sort $ find (invert (suffix "00 - pregap.flac")) splitDir
+    proc "rm" ["-f", format fp (splitDir </> "00 - pregap.flac")] empty
+    splitFiles <- sort $ ls splitDir
     proc "cuetag.sh" (format fp <$> (cueSheet : splitFiles)) empty
         .||. die "Error: failed to tag split files"
 
