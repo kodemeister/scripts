@@ -22,11 +22,13 @@ declare -r VM_UDP_PORTS=(
 declare -r VM_WHITELIST=(
   192.30.252.0/22    # GitHub
   185.199.108.0/22   # GitHub
+  140.82.112.0/20    # GitHub
   50.31.156.0/25     # Beanstalk
   91.189.88.0/21     # Canonical Group Limited
   162.213.32.0/22    # Canonical USA Inc.
   185.125.188.0/22   # Canonical Group Limited
   213.180.204.183    # ru.archive.ubuntu.com
+  45.59.69.178       # msys2.org
   54.88.117.136      # frontier.sferalabs.com
   91.199.212.132     # timestamp.comodoca.com
   # Dynamically changing IP addresses (pinned in /etc/dnsmasq.conf)
