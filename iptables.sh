@@ -2,7 +2,11 @@
 
 declare -r INET_IF="eno1"
 declare -r INET_TCP_PORTS=(
+  8200  # ReadyMedia
   51413 # BitTorrent
+)
+declare -r INET_UDP_PORTS=(
+  1900  # Simple Service Discovery Protocol
 )
 
 declare -r VM_IF="br0"
@@ -106,9 +110,12 @@ set_inet_rules()
   iptables -A INPUT -p tcp --syn -m conntrack --ctstate NEW -j tcp
   iptables -A INPUT -p udp -m conntrack --ctstate NEW -j udp
 
-  # open TCP ports
+  # open TCP/UDP ports
   for port in "${INET_TCP_PORTS[@]}"; do
     iptables -A tcp -p tcp --dport "$port" -j ACCEPT
+  done
+  for port in "${INET_UDP_PORTS[@]}"; do
+    iptables -A udp -p udp --dport "$port" -j ACCEPT
   done
 
   # reject all other TCP/UDP packets with TCP RESET or ICMP port unreachable messages
