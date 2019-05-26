@@ -7,7 +7,7 @@ license:             MIT
 license-file:        LICENSE
 author:              kodemeister
 maintainer:          kodemeister@outlook.com
-copyright:           2018 kodemeister
+copyright:           (c) 2018-2019 kodemeister
 category:            Shell
 build-type:          Simple
 cabal-version:       >=1.10

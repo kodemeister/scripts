@@ -1,6 +1,3 @@
-#!/usr/bin/env stack
--- stack --resolver lts-13.5 script
-
 {-# LANGUAGE OverloadedStrings #-}
 
 import Control.Foldl (list)
