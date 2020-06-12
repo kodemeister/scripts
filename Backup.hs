@@ -1,5 +1,3 @@
-{-# LANGUAGE OverloadedStrings #-}
-
 import Control.Foldl (list)
 import System.Posix.User (getEffectiveUserID)
 import Turtle

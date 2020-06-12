@@ -1,10 +1,13 @@
+# Cabal
 .cabal-sandbox/
 .ghc.environment.*
-.stack-work
 cabal.config
 cabal.project.local
 cabal.project.local~
 cabal.sandbox.config
 dist/
 dist-newstyle/
+
+# Stack
+.stack-work/
 stack.yaml.lock

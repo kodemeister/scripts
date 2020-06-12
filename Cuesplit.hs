@@ -1,5 +1,3 @@
-{-# LANGUAGE OverloadedStrings #-}
-
 import Control.Monad (filterM)
 import Data.Foldable (for_)
 
