@@ -44,7 +44,7 @@ removeLvmSnapshot snapshot = do
 backupBootPartition :: Turtle.FilePath -> Turtle.FilePath -> IO ()
 backupBootPartition mountPoint backupDir = do
     printf ("Backing up boot partition "%fp%" to "%fp%"\n") mountPoint backupDir
-    proc "rm" ["-rf", format fp backupDir] empty
+    void $ proc "rm" ["-rf", format fp backupDir] empty
     mktree backupDir
     files <- fold (ls mountPoint) list
     execute "cp" ("-rp" : (format fp <$> files) <> [format fp backupDir])
@@ -80,9 +80,8 @@ showSuccessMessage :: IO ()
 showSuccessMessage = echo "Yay! Backup has been successfully completed!"
 
 execute :: Text -> [Text] -> Text -> IO ()
-execute command arguments errorText = do
-    proc command arguments empty .||. die errorText
-    pure ()
+execute command args errorText =
+    void $ proc command args empty .||. die errorText
 
 main :: IO ()
 main = do

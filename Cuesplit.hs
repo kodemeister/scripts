@@ -30,17 +30,17 @@ splitAudioFile cueSheet audioFile = do
     let splitDir = replaceExtension cueSheet "tmp"
     mktree splitDir
 
-    proc "shnsplit" [ "-d", format fp splitDir
-                    , "-f", format fp cueSheet
-                    , "-o", "flac flac -V --best -o %f -"
-                    , "-t", "%n - %t"
-                    , format fp audioFile
-                    ] empty
+    void $ proc "shnsplit" [ "-d", format fp splitDir
+                           , "-f", format fp cueSheet
+                           , "-o", "flac flac -V --best -o %f -"
+                           , "-t", "%n - %t"
+                           , format fp audioFile
+                           ] empty
         .||. die (format ("Error: failed to split audio file "%fp) audioFile)
 
-    proc "rm" ["-f", format fp (splitDir </> "00 - pregap.flac")] empty
+    void $ proc "rm" ["-f", format fp (splitDir </> "00 - pregap.flac")] empty
     splitFiles <- sort $ ls splitDir
-    proc "cuetag.sh" (format fp <$> (cueSheet : splitFiles)) empty
+    void $ proc "cuetag.sh" (format fp <$> (cueSheet : splitFiles)) empty
         .||. die "Error: failed to tag split files"
 
     for_ splitFiles $ \file ->
